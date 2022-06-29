@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'gameapp.apps.GameappConfig',
+    'scoreapp.apps.ScoreappConfig',
 ]
 
 MIDDLEWARE = [
@@ -77,8 +77,12 @@ WSGI_APPLICATION = 'djScore.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'djscore2',
+        'USER': 'dba',
+        'PASSWORD': 'dba@mysql.com',
+        'HOST': '101.37.89.200',
+        'PORT': 3306,
     }
 }
 
