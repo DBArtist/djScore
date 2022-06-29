@@ -21,10 +21,22 @@ from scoreapp.views import user
 urlpatterns = [
     # path('admin/', admin.site.urls),
     # path('index/', views.index),
-    re_path(r'^$', user.user_list),
+    re_path(r'^$', user.user_login),
 
     # 用户管理
     path('user/list/', user.user_list),
-    path('user/add/', user.user_add),
+    # path('user/add/', user.user_add),
+    path('user/model/form/add/', user.user_model_form_add),
+    path('user/<int:nid>/edit/', user.user_edit),
+    path('user/<int:nid>/delete/', user.user_delete),
+
+    # 用户登录
+    path('login/', user.user_login),
+    path('logout/', user.user_logout),
+    path('image/code/', user.image_code),
+
+
+
+
 ]
 
