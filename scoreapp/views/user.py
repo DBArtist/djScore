@@ -194,8 +194,6 @@ def user_login(request):
         # 去数据库校验用户名和密码是否正确，获取用户对象、None
         # admin_object = models.Admin.objects.filter(username=xxx, password=xxx).first()
         user_object = models.UserInfo.objects.filter(**form.cleaned_data).first()
-        print (form.cleaned_data)
-        print (request.POST.get("user_password"))
         if not user_object:
             form.add_error("user_password", "用户名或密码错误")
             # form.add_error("username", "用户名或密码错误")
