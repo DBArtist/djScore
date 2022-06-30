@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+from conf import db
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,17 +77,18 @@ WSGI_APPLICATION = 'djScore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'djscore2',
-        'USER': 'dba',
-        'PASSWORD': 'dba@mysql.com',
-        'HOST': '101.37.89.200',
-        'PORT': 3306,
-    }
-}
+# DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': 'dbname',
+#             'USER': 'user',
+#             'PASSWORD': 'password',
+#             'HOST': 'host_ip',
+#             'PORT': 3306,
+#         }
+#     }
 
+DATABASES = db.mysql_config()
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
