@@ -62,42 +62,6 @@
     </form>
 </div>
 
-
-<!-- 登录 对话框-->
-<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">新建订单</h4>
-            </div>
-            <div class="modal-body">
-
-                <form id="formAdd">
-                    <div class="clearfix">
-                        {% for field in form %}
-                            <div class="col-xs-6">
-                                <div class="form-group" style="position: relative;margin-bottom: 20px;">
-                                    <label>{{ field.label }}</label>
-                                    {{ field }}
-                                    <span class="error-msg" style="color: red;position: absolute;"></span>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </form>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="btnSave">保存</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 <!-- 注册 对话框-->
 <div class="modal fade" id="regModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -132,9 +96,6 @@
     </div>
 </div>
 
-
-<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
-<script src="{% static 'plugins/bootstrap-3.4.1/js/bootstrap.min.js' %}"></script>
 <script type="text/javascript">
     $(function () {
         bindBtnRegEvent();
@@ -142,11 +103,11 @@
 
     function bindBtnRegEvent() {
         $("#btnReg").click(function () {
-            alert("目前仅支持内部使用，暂未对外开放注册，敬请期待！")
             // 点击注册按钮,显示注册对话框
-            // $('#regModal').modal('show');
+            $('#regModal').modal('show');
         })
     }
+
 
 
 </script>

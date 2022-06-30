@@ -233,3 +233,8 @@ def user_logout(request):
     request.session.clear()
 
     return redirect('/login/')
+
+
+def user_register(request):
+    """ 注册 """
+    return HttpResponse("XXX")

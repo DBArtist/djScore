@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,re_path
-from scoreapp.views import user
+from scoreapp.views import user,room
 
 
 urlpatterns = [
@@ -33,10 +33,12 @@ urlpatterns = [
     # 用户登录
     path('login/', user.user_login),
     path('logout/', user.user_logout),
+    path('register/', user.user_register),
     path('image/code/', user.image_code),
 
-
-
+    # 房间管理
+    path('room/list/', room.room_list),
+    path('room/add/', room.room_add),
 
 ]
 
