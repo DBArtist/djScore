@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container">
         <div>
-            <input type="button" value="新建房间" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            <input type="button" value="加入房间" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
 {#            <input type="button" value="新建房间" class="btn btn-primary" id="btnAdd">#}
         </div>
 
@@ -11,7 +11,7 @@
             <!-- Default panel contents -->
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-                房间列表
+                房间用户列表
             </div>
 
             <!-- Table -->
@@ -19,10 +19,10 @@
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>名称</th>
-                    <th>房主</th>
-                    <th>状态</th>
-                    <th>创建时间</th>
+                    <th>房间名称</th>
+                    <th>玩家昵称</th>
+                    <th>玩家方位</th>
+                    <th>入座时间</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -30,14 +30,12 @@
                 {% for obj in queryset %}
                     <tr>
                         <th>{{ obj.id }}</th>
-                        <td>{{ obj.roomname }}</td>
-                        <td>{{ obj.owner.user_nick }}</td>
-                        <td>{{ obj.get_roomstatus_display }}</td>
+                        <td>{{ obj.room.roomname }}</td>
+                        <td>{{ obj.user.user_nick }}</td>
+                        <td>{{ obj.get_position_display }}</td>
                         <td>{{ obj.create_time|date:"Y-m-d H:i:s" }}</td>
                         <td>
-                            <a class="btn btn-primary btn-xs" href="/room/{{ obj.id }}/info/" rid="{{ obj.id }}">进入</a>
-                            <a class="btn btn-primary btn-xs" href="#">结算</a>
-                            <a class="btn btn-danger btn-xs" href="#">关闭</a>
+                            <a class="btn btn-primary btn-xs" href="#">退桌</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -45,23 +43,22 @@
             </table>
         </div>
 
-        <! -- 分页功能 -->
-        <ul class="pagination">
-            {{ page_string }}
-        </ul>
+{#        <! -- 分页功能 -->#}
+{#        <ul class="pagination">#}
+{#            {{ page_string }}#}
+{#        </ul>#}
     </div>
 
-    <!-- 新建房间 对话框-->
+    <!-- 加入房间 对话框-->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">新建房间</h4>
+                    <h4 class="modal-title" id="myModalLabel">加入房间</h4>
                 </div>
                 <div class="modal-body">
-
                     <form id="formAdd">
                         <div class="clearfix">
                             {% for field in form %}
@@ -99,6 +96,7 @@
         function bindBtnAddEvent(){
             $('#btnAdd').click(function (){
                 // 点击新建按钮，显示对话框
+                alert("显示对话框")
                 $('#myModal').modal('show');
             })
         }
@@ -109,7 +107,7 @@
                 $(".error-msg").empty();
                 // 向后台发送请求
                 $.ajax({
-                    url: "/room/add/",
+                    url: "/room/" + rid+ "/user/add/",
                     type: "post",
                     data: $("#formAdd").serialize(),
                     dataType: "JSON",

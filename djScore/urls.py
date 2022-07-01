@@ -39,6 +39,10 @@ urlpatterns = [
     # 房间管理
     path('room/list/', room.room_list),
     path('room/add/', room.room_add),
+    path('room/<int:rid>/info/', room.room_user_list),
+    path('room/<int:rid>/user/add/', room.room_user_add),
+
+
 
 ]
 
