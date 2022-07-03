@@ -2,19 +2,29 @@
 
 {% block content %}
     <div class="container">
-        <div>
-            <input type="button" value="加入房间" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-{#            <input type="button" value="新建房间" class="btn btn-primary" id="btnAdd">#}
+        <div class="clearfix">
+            <div class="col-xs-1">
+                <input type="button" value="加入房间" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                {#            <input type="button" value="新建房间" class="btn btn-primary" id="btnAdd">#}
+            </div>
+
+            <div class="col-xs-1">
+                <a class="btn btn-primary" href="/room/13/lock/">锁定房间</a>
+            </div>
+
+            <div class="col-xs-1">
+                <a class="btn btn-primary" href="/room/13/gamerecord/list/">查看对局记录</a>
+            </div>
         </div>
 
-        <div class="panel panel-default" >
+        <!-- 房间用户列表 -->
+        <div class="panel panel-default" style="margin-top: 20px">
             <!-- Default panel contents -->
             <div class="panel-heading">
                 <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                 房间用户列表
             </div>
 
-            <!-- Table -->
             <table class="table table-bordered">
                 <thead>
                 <tr>
@@ -35,18 +45,21 @@
                         <td>{{ obj.get_position_display }}</td>
                         <td>{{ obj.create_time|date:"Y-m-d H:i:s" }}</td>
                         <td>
-                            <a class="btn btn-primary btn-xs" href="#">退桌</a>
+                            {#                            <input type="button" value="退出房间" class="btn btn-danger btn-sm" data-toggle="modal"#}
+                            {#                                   data-target="#exitModal" list="obj.id">#}
+                            <a class="btn btn-primary btn-xs" href="/room/user/{{ obj.id }}/delete/"
+                               ruid="{{ obj.id }} ">退出房间</a>
+
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
+
         </div>
 
-{#        <! -- 分页功能 -->#}
-{#        <ul class="pagination">#}
-{#            {{ page_string }}#}
-{#        </ul>#}
+    </div>
+
     </div>
 
     <!-- 加入房间 对话框-->
@@ -82,22 +95,70 @@
         </div>
     </div>
 
+    <!-- 退出房间 对话框-->
+    <div class="modal fade" id="exitModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">退出房间</h4>
+                </div>
+                <div class="modal-body">
+                    <h2 style="color: red"> 确定退出当前房间？</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnExit">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
 
 {% block js %}
     <script type="text/javascript">
-        $(function (){
+        $(function () {
             bindBtnAddEvent();
             bindBtnSaveEvent();
+            bindBtnExitEvent();
         })
 
 
-        function bindBtnAddEvent(){
-            $('#btnAdd').click(function (){
+        function bindBtnAddEvent() {
+            $('#btnAdd').click(function () {
                 // 点击新建按钮，显示对话框
                 alert("显示对话框")
                 $('#myModal').modal('show');
+            })
+        }
+
+        function bindBtnExitEvent() {
+            $("#btnExit").click(function () {
+                //向后台发送请求
+                $.ajax({
+                    url: "/room/user/7/delete/",
+                    type: "post",
+                    data: $("list").serialize(),
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            // alert("添加成功");
+                            // 清空表单  $("formAdd")是jQuery对象; $("formAdd")[0]是DOM对象;
+                            $("#formInfo")[0].reset();
+                            // 关闭对话框
+                            $('#exitModal').modal('hide');
+                            // 刷新页面
+                            location.reload();
+                        } else {
+                            // 把错误信息显示在对话框中
+                            $.each(res.error, function (name, errorList) {
+                                $("#id_" + name).next().text(errorList[0])
+                            });
+                        }
+                    }
+                })
             })
         }
 
@@ -107,7 +168,7 @@
                 $(".error-msg").empty();
                 // 向后台发送请求
                 $.ajax({
-                    url: "/room/" + rid+ "/user/add/",
+                    url: "/room/13/user/add/",
                     type: "post",
                     data: $("#formAdd").serialize(),
                     dataType: "JSON",

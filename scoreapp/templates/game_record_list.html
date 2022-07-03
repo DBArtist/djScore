@@ -1,0 +1,498 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="clearfix">
+            <div class="col-xs-3">
+                <input type="button" value="添加对局记录(1人记录所有)" class="btn btn-primary" data-toggle="modal"
+                       data-target="#myModal">
+            </div>
+
+            <div class="col-xs-3">
+                <input type="button" value="赢家添加对局(其他3人补充)" class="btn btn-primary" data-toggle="modal"
+                       data-target="#winnerModal">
+            </div>
+
+            <div class="col-xs-5">
+                <a class="btn btn-primary" href="/room/list/">返回房间大厅</a>
+            </div>
+        </div>
+
+        <!-- 对局记录 -->
+        <div class="panel panel-default" style="margin-top: 20px">
+            <!-- Default panel contents -->
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                对局记录
+            </div>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>东用户</th>
+                    <th>东积分</th>
+                    <th>东输赢</th>
+                    <th>南用户</th>
+                    <th>南积分</th>
+                    <th>南输赢</th>
+                    <th>西用户</th>
+                    <th>西积分</th>
+                    <th>西输赢</th>
+                    <th>北用户</th>
+                    <th>北积分</th>
+                    <th>北输赢</th>
+                    <th>类型</th>
+                    <th>状态</th>
+                    <th>对局时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for obj in queryset %}
+                    <tr>
+                        <th>{{ obj.id }}</th>
+                        <td>{{ obj.user_east.user_nick }}</td>
+                        <td>{{ obj.score_east }}</td>
+                        <td>{{ obj.get_result_east_display }}</td>
+
+                        <td>{{ obj.user_south.user_nick }}</td>
+                        <td>{{ obj.score_south }}</td>
+                        <td>{{ obj.get_result_south_display }}</td>
+
+                        <td>{{ obj.user_west.user_nick }}</td>
+                        <td>{{ obj.score_west }}</td>
+                        <td>{{ obj.get_result_west_display }}</td>
+
+                        <td>{{ obj.user_north.user_nick }}</td>
+                        <td>{{ obj.score_north }}</td>
+                        <td>{{ obj.get_result_north_display }}</td>
+                        <td>{{ obj.get_record_type_display }}</td>
+                        <td>{{ obj.get_record_status_display }}</td>
+                        <td>{{ obj.create_time|date:"H:i:s" }}</td>
+                        <td>
+                            <input recordid="{{ obj.id }}" rid="{{ obj.room.id }}" type="button"
+                                   class="btn btn-primary btn-xs btn-edit" value="编辑">
+                            <input recordid="{{ obj.id }}" rid="{{ obj.room.id }}" type="button"
+                                   class="btn btn-info btn-xs btn-confirm" value="确认">
+                            <input recordid="{{ obj.id }}" rid="{{ obj.room.id }}" type="button"
+                                   class="btn btn-danger btn-xs btn-delete" value="删除">
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <! -- 分页功能 -->
+        <ul class="pagination">
+            {{ page_string }}
+        </ul>
+
+    </div>
+
+    </div>
+
+    <!-- 新建/修改对局记录 对话框-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添加对局记录</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="formAdd">
+                        <div class="clearfix">
+                            {% for field in form %}
+                                <div class="col-xs-6">
+                                    <div class="form-group" style="position: relative;margin-bottom: 20px;">
+                                        <label>{{ field.label }}</label>
+                                        {{ field }}
+                                        <span class="error-msg" style="color: red;position: absolute;"></span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnSave">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 赢家创建/修改对局记录 对话框-->
+    <div class="modal fade" id="winnerModal" tabindex="-1" role="dialog" aria-labelledby="winnerModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添加对局记录(只要确认谁是赢家,不需要填写积分)</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="winnerFormAdd">
+                        <div class="clearfix">
+                            <div style="margin-left: 2px; margin-top: 10px">
+                                <h2>请选择赢家：</h2>
+                                {% for field in winnerForm %}
+                                    <div><input type="radio" name="usernick" checked> : {{ field }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnWinnerSave">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认（对话框） -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel">
+        <div class="modal-dialog" role="document">
+
+            <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                <h4>确认记录无误？</h4>
+                <p style="margin: 10px 0;"> 确认后,该条记录就不能再被修改了。得先确认该记录,才能再添加新的对局记录。</p>
+                <p style="text-align: right;">
+                    <button id="btnConfirmConfirm" type="button" class="btn btn-info">确 定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 删除（对话框） -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+
+            <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                <h4>是否确定删除？</h4>
+                <p style="margin: 10px 0;"> 删除后，所有关联的相关数据都会被删除。</p>
+                <p style="text-align: right;">
+                    <button id="btnConfirmDelete" type="button" class="btn btn-danger">确 定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
+                </p>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        var DELETE_ID;
+        var EDIT_ID;
+        var ROOM_ID;
+
+        $(function () {
+            bindBtnAddEvent();
+            bindBtnSaveEvent();
+            bindBtnExitEvent();
+            bindBtnDeleteEvent();
+            bindBtnConfirmDeleteEvent();
+            bindBtnEditEvent();
+            bindBtnConfirmEvent();
+            bindBtnConfirmConfirmEvent();
+            bindBtnWinnerAddEvent();
+        })
+
+
+        function bindBtnAddEvent() {
+            $('#btnAdd').click(function () {
+                // 将正在编辑的ID设置为空
+                EDIT_ID = undefined;
+                ROOM_ID = undefined;
+
+                // 清空对话框中的数据
+                $("#formAdd")[0].reset();
+
+                // 设置对话框的标题
+                $("#myModalLabel").text("新建对局记录");
+
+                // 点击新建按钮，显示对话框。
+                $('#myModal').modal('show');
+            })
+        }
+
+        function bindBtnEditEvent() {
+            $(".btn-edit").click(function () {
+                // 清空对话框中的数据
+                $("#formAdd")[0].reset();
+                var recordid = $(this).attr("recordid");
+                var rid = $(this).attr("rid");
+                EDIT_ID = recordid;
+                ROOM_ID = rid;
+
+                // 发送Ajax去后端获取当前行的相关数据  /order/detail/?uid=123
+                $.ajax({
+                    url: "/room/gamerecord/detail/",
+                    type: "get",
+                    data: {
+                        rid: rid,
+                        recordid: recordid
+                    },
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            // 将数据赋值到对话框中的标签中。
+                            $.each(res.data, function (name, value) {
+                                $("#id_" + name).val(value);
+                            })
+                            // 修改对话框的标题
+                            $("#myModalLabel").text("编辑对局记录");
+
+                            // 点击编辑，显示对话框
+                            $('#myModal').modal('show');
+                        } else {
+                            alert(res.error);
+                        }
+                    }
+                })
+            });
+        }
+
+        function doAdd() {
+            // 向后台发送请求（添加的Ajax请求）
+            $.ajax({
+                url: "/room/gamerecord/add/?rid=13",
+                type: "post",
+                data: $("#formAdd").serialize(),
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+
+                        // alert("创建成功");
+
+                        // 清空表单  $("#formAdd")是jQuery对象 -> $("#formAdd")[0] DOM对象
+                        $("#formAdd")[0].reset();
+
+                        // 关闭对话框
+                        $('#myModal').modal('hide');
+
+                        // 刷新页面
+                        location.reload();
+
+                    } else {
+                        // 把错误信息显示在对话框中。
+                        $.each(res.error, function (name, errorList) {
+                            $("#id_" + name).next().text(errorList[0]);
+                        })
+                    }
+                }
+            })
+        }
+
+        function doEdit() {
+            // 向后台发送请求（添加的Ajax请求）
+            $.ajax({
+                url: "/room/gamerecord/edit/" + "?rid=" + ROOM_ID + "&recordid=" + EDIT_ID,  //  -> /room/gamerecord/edit/?rid=13&recordid=11
+                type: "post",
+                data: $("#formAdd").serialize(),
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        // 清空表单  $("#formAdd")是jQuery对象 -> $("#formAdd")[0] DOM对象
+                        $("#formAdd")[0].reset();
+
+                        // 关闭对话框
+                        $('#myModal').modal('hide');
+
+                        // 刷新页面
+                        location.reload();
+
+                    } else {
+                        if (res.tips) {
+                            alert(res.tips);
+                        } else {
+                            // 把错误信息显示在对话框中。
+                            $.each(res.error, function (name, errorList) {
+                                $("#id_" + name).next().text(errorList[0]);
+                            })
+                        }
+                    }
+                }
+            })
+        }
+
+        function bindBtnSaveEvent() {
+            $("#btnSave").click(function () {
+
+                // 清除错误信息
+                $(".error-msg").empty();
+
+                if (EDIT_ID) {
+                    // 编辑
+                    doEdit();
+                } else {
+                    // 添加
+                    doAdd();
+                }
+
+            });
+        }
+
+        function bindBtnDeleteEvent() {
+            $(".btn-delete").click(function () {
+                // alert("点击了删除");
+                // 显示删除对话框
+                $("#deleteModal").modal('show');
+
+                // 获取当前行的ID并赋值给全部变量。
+                DELETE_ID = $(this).attr("recordid");
+                ROOM_ID = $(this).attr("rid");
+            });
+        }
+
+        function bindBtnConfirmDeleteEvent() {
+            $("#btnConfirmDelete").click(function () {
+                $.ajax({
+                    url: "/room/gamerecord/delete/",  //    => /order/delete/?recordid=123
+                    type: "GET",
+                    data: {
+                        recordid: DELETE_ID,
+                        rid: ROOM_ID,
+                    },
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            // 隐藏删除框
+                            // $("#deleteModal").modal('hide');
+                            // 在页面上将当前一行数据删除（js）
+                            // $("tr[uid='" + DELETE_ID + "']").remove();
+                            // 要删除的ID制空
+                            // DELETE_ID = 0;
+                            // 简单的思路：
+                            location.reload();
+                        } else {
+                            // 删除失败
+                            alert(res.error);
+                        }
+                    }
+                })
+            });
+        }
+
+        function bindBtnExitEvent() {
+            $("#btnExit").click(function () {
+                //向后台发送请求
+                $.ajax({
+                    url: "/room/user/7/delete/",
+                    type: "post",
+                    data: $("list").serialize(),
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            // alert("添加成功");
+                            // 清空表单  $("formAdd")是jQuery对象; $("formAdd")[0]是DOM对象;
+                            $("#formInfo")[0].reset();
+                            // 关闭对话框
+                            $('#exitModal').modal('hide');
+                            // 刷新页面
+                            location.reload();
+                        } else {
+                            // 把错误信息显示在对话框中
+                            $.each(res.error, function (name, errorList) {
+                                $("#id_" + name).next().text(errorList[0])
+                            });
+                        }
+                    }
+                })
+            })
+        }
+
+        // 确认按钮事件
+        function bindBtnConfirmEvent() {
+            $(".btn-confirm").click(function () {
+                // 显示确认对话框
+                $("#confirmModal").modal('show');
+
+                // 获取当前行的ID并赋值给全部变量。
+                DELETE_ID = $(this).attr("recordid");
+                ROOM_ID = $(this).attr("rid");
+            });
+        }
+
+        // 确认确认按钮事件
+        function bindBtnConfirmConfirmEvent() {
+            $("#btnConfirmConfirm").click(function () {
+                $.ajax({
+                    url: "/room/gamerecord/confirm/",  //    => /room/gamerecord/confirm/?rid=1&recordid=2
+                    type: "GET",
+                    data: {
+                        rid: ROOM_ID,
+                        recordid: DELETE_ID,
+                    },
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            // 隐藏删除框
+                            // $("#deleteModal").modal('hide');
+                            // 在页面上将当前一行数据删除（js）
+                            // $("tr[uid='" + DELETE_ID + "']").remove();
+                            // 要删除的ID制空
+                            // DELETE_ID = 0;
+                            // 简单的思路：
+                            location.reload();
+                        } else {
+                            // 删除失败
+                            alert(res.error);
+                        }
+                    }
+                })
+            });
+        }
+
+
+
+        // 赢家添加记录
+        function bindBtnWinnerAddEvent() {
+            $('#btnAdd').click(function () {
+                // 将正在编辑的ID设置为空
+                EDIT_ID = undefined;
+                ROOM_ID = undefined;
+
+                // 清空对话框中的数据
+                $("#formAdd")[0].reset();
+
+                // 设置对话框的标题
+                $("#myModalLabel").text("新建对局记录");
+
+                // 点击新建按钮，显示对话框。
+                $('#myModal').modal('show');
+            })
+        }
+
+        // 赢家保存记录
+        function bindBtnWinnerSaveEvent() {
+            $("#btnWinnerSave").click(function () {
+
+                // 清除错误信息
+                $(".error-msg").empty();
+
+                if (EDIT_ID) {
+                    // 编辑
+                    doEdit();
+                } else {
+                    // 添加
+                    doAdd();
+                }
+
+            });
+        }
+    </script>
+
+{% endblock %}

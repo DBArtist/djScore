@@ -23,14 +23,6 @@ class RoomModelForm(BootStrapModelForm):
         # }
 
 
-class RoomUserModelForm(BootStrapModelForm):
-    class Meta:
-        model = models.RoomUser
-        fields = ["position"]
-        labels={
-            "position":"入座方位"
-        }
-
 def room_list(request):
     """ 房间列表 """
     queryset = models.Room.objects.all().order_by('-id')
@@ -73,62 +65,6 @@ def room_add(request):
     # return render(request, 'room_list.html', {'form': form})
     # models.Room.objects.create(roomname=roomname,owner=userobj,roomstatus=1)
     # return redirect("/room/list/")
-
-
-def room_user_list(request, rid):
-    """ 房间用户列表 """
-    if request.method == "GET":
-        # 根据rid获取数据
-        queryset = models.RoomUser.objects.filter(room=rid).order_by('position')
-        form = RoomUserModelForm()
-        # 重定向部门列表
-        return render(request, 'room_user_list.html', {"form":form,"queryset": queryset,"rid":rid})
-
-    return HttpResponse("AOU")
-
-    # 不分页了
-    # page_object = Pagination(request, queryset, page_size=50)
-    # form = RoomModelForm()
-    # context = {
-    #     "form":form,
-    #     "queryset": page_object.page_queryset, # 分完页的数据
-    #     "page_string": page_object.html(),     # 生成页码
-    # }
-    # return render(request, 'room_list.html', context)
-
-
-@csrf_exempt
-def room_user_add(request,rid):
-    """加入房间（ajax请求）"""
-    form = RoomUserModelForm(data=request.POST)
-    print ("begin room_user_add")
-    if form.is_valid():
-        print(f'room_user_add={form.cleaned_data}')
-        # 从session中获取用户ID
-        owner = request.session.get('info')["id"]
-
-        # 查询UserInfo实例化owner
-        form.instance.owner = models.UserInfo.objects.get(id=owner)
-
-        # 判断该方位是否已经有人了
-        exists = models.RoomUser.objects.filter(position=form.position,room=rid).first()
-        if exists:
-            form.add_error("position", "该位置已经有人入座了")
-            return JsonResponse({"status": False, "error": form.errors})
-
-        # 判断该用户是否已经入座过了
-        exists2 = models.RoomUser.objects.filter(user=owner,room=rid).first()
-        if exists2:
-            form.add_error("position", "您已经入座了")
-            return JsonResponse({"status": False, "error": form.errors})
-        form.save()
-        return JsonResponse({"status": True})
-    return JsonResponse({"status": False, "error": form.errors})
-    # return render(request, 'room_list.html', {'form': form})
-    # models.Room.objects.create(roomname=roomname,owner=userobj,roomstatus=1)
-    # return redirect("/room/list/")
-
-
 
 def room_delete(request):
     """删除部门"""

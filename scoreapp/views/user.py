@@ -8,13 +8,95 @@ from scoreapp.utils.bootstrap import BootStrapModelForm, BootStrapForm
 from scoreapp.utils.encrypt import md5
 from scoreapp.utils.code import check_code
 from io import BytesIO
+from django.http import JsonResponse
+
+class LoginForm(BootStrapForm):
+    user_account = forms.CharField(
+        label="用户名",
+        widget=forms.TextInput,
+        required=True
+    )
+    user_password = forms.CharField(
+        label="密码",
+        widget=forms.PasswordInput(render_value=True),
+        required=True
+    )
+
+    code = forms.CharField(
+        label="验证码",
+        widget=forms.TextInput,
+        required=True
+    )
+
+    def clean_user_password(self):
+        pwd = self.cleaned_data.get("user_password")
+        return md5(pwd)
+
+class UserModelForm(BootStrapModelForm):
+    confirm_password = forms.CharField(
+        label="确认密码",
+        widget=forms.PasswordInput(render_value=True)
+    )
+
+    class Meta:
+        model = models.UserInfo
+        fields = ["user_account", "user_password", "confirm_password", "user_nick", "mobile","gender"]
+        widgets = {
+            "user_password": forms.PasswordInput(render_value=True)
+        }
+
+    def clean_user_password(self):
+        pwd = self.cleaned_data.get("user_password")
+        return md5(pwd)
+
+    def clean_confirm_password(self):
+        pwd = self.cleaned_data.get("user_password")
+        confirm = md5(self.cleaned_data.get("confirm_password"))
+        if confirm != pwd:
+            raise ValidationError("密码不一致")
+        # 返回什么，此字段以后保存到数据库就是什么。
+        return confirm
+
+
+
+class UserResetModelForm(BootStrapModelForm):
+    confirm_password = forms.CharField(
+        label="确认密码",
+        widget=forms.PasswordInput(render_value=True)
+    )
+
+    class Meta:
+        model = models.UserInfo
+        fields = ['user_password', 'confirm_password']
+        widgets = {
+            "user_password": forms.PasswordInput(render_value=True)
+        }
+
+    def clean_user_password(self):
+        pwd = self.cleaned_data.get("user_password")
+        md5_pwd = md5(pwd)
+
+        # 去数据库校验当前密码和新输入的密码是否一致
+        exists = models.UserInfo.objects.filter(id=self.instance.pk, user_password=md5_pwd).exists()
+        if exists:
+            raise ValidationError("不能与以前的密码相同")
+        return md5_pwd
+
+    def clean_confirm_password(self):
+        pwd = self.cleaned_data.get("user_password")
+        confirm = md5(self.cleaned_data.get("confirm_password"))
+        if confirm != pwd:
+            raise ValidationError("密码不一致")
+        # 返回什么，此字段以后保存到数据库就是什么。
+        return confirm
+
 
 
 def user_list(request):
     """ 用户列表 """
     queryset = models.UserInfo.objects.all()
 
-    page_object = Pagination(request, queryset, page_size=2)
+    page_object = Pagination(request, queryset, page_size=50)
     context = {
         "queryset": page_object.page_queryset,
         "page_string": page_object.html(),
@@ -56,10 +138,17 @@ def user_model_form_add(request):
     # 用户POST提交数据，数据校验。
     form = UserModelForm(data=request.POST)
     if form.is_valid():
+        print (form.cleaned_data)
         # 如果数据合法，保存到数据库
         # {'name': '123', 'password': '123', 'age': 11, 'account': Decimal('0'), 'create_time': datetime.datetime(2011, 11, 11, 0, 0, tzinfo=<UTC>), 'gender': 1, 'depart': <Department: IT运维部门>}
         # print(form.cleaned_data)
         # models.UserInfo.objects.create(..)
+
+        # 判断账号是否存在
+        exists = models.UserInfo.objects.filter(user_account=form.cleaned_data["user_account"]).first()
+        if exists:
+            form.add_error("user_account", "账号已存在")
+            return render(request, 'user_model_form_add.html', {"form": form})
         form.save()
         return redirect('/user/list/')
 
@@ -90,85 +179,7 @@ def user_delete(request, nid):
     return redirect('/user/list/')
 
 
-class UserModelForm(BootStrapModelForm):
-    confirm_password = forms.CharField(
-        label="确认密码",
-        widget=forms.PasswordInput(render_value=True)
-    )
 
-    class Meta:
-        model = models.UserInfo
-        fields = ["user_account", "user_password", "confirm_password", "user_nick", "mobile"]
-        widgets = {
-            "user_password": forms.PasswordInput(render_value=True)
-        }
-
-    def clean_user_password(self):
-        pwd = self.cleaned_data.get("user_password")
-        return md5(pwd)
-
-    def clean_confirm_password(self):
-        pwd = self.cleaned_data.get("user_password")
-        confirm = md5(self.cleaned_data.get("confirm_password"))
-        if confirm != pwd:
-            raise ValidationError("密码不一致")
-        # 返回什么，此字段以后保存到数据库就是什么。
-        return confirm
-
-
-class UserResetModelForm(BootStrapModelForm):
-    confirm_password = forms.CharField(
-        label="确认密码",
-        widget=forms.PasswordInput(render_value=True)
-    )
-
-    class Meta:
-        model = models.UserInfo
-        fields = ['user_password', 'confirm_password']
-        widgets = {
-            "user_password": forms.PasswordInput(render_value=True)
-        }
-
-    def clean_user_password(self):
-        pwd = self.cleaned_data.get("user_password")
-        md5_pwd = md5(pwd)
-
-        # 去数据库校验当前密码和新输入的密码是否一致
-        exists = models.UserInfo.objects.filter(id=self.instance.pk, user_password=md5_pwd).exists()
-        if exists:
-            raise ValidationError("不能与以前的密码相同")
-        return md5_pwd
-
-    def clean_confirm_password(self):
-        pwd = self.cleaned_data.get("user_password")
-        confirm = md5(self.cleaned_data.get("confirm_password"))
-        if confirm != pwd:
-            raise ValidationError("密码不一致")
-        # 返回什么，此字段以后保存到数据库就是什么。
-        return confirm
-
-
-class LoginForm(BootStrapForm):
-    user_account = forms.CharField(
-        label="用户名",
-        widget=forms.TextInput,
-        required=True
-    )
-    user_password = forms.CharField(
-        label="密码",
-        widget=forms.PasswordInput(render_value=True),
-        required=True
-    )
-
-    code = forms.CharField(
-        label="验证码",
-        widget=forms.TextInput,
-        required=True
-    )
-
-    def clean_user_password(self):
-        pwd = self.cleaned_data.get("user_password")
-        return md5(pwd)
 
 
 def user_login(request):

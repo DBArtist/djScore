@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,re_path
-from scoreapp.views import user,room
+from scoreapp.views import user,room,room_user,game_record
 
 
 urlpatterns = [
@@ -39,10 +39,23 @@ urlpatterns = [
     # 房间管理
     path('room/list/', room.room_list),
     path('room/add/', room.room_add),
-    path('room/<int:rid>/info/', room.room_user_list),
-    path('room/<int:rid>/user/add/', room.room_user_add),
 
+    # 房间用户管理
+    path('room/<int:rid>/info/', room_user.room_user_list),
+    path('room/<int:rid>/lock/', room_user.room_user_lock),
+    path('room/<int:rid>/user/add/', room_user.room_user_add),
+    path('room/user/<int:ruid>/delete/', room_user.room_user_delete),
 
+    # 游戏记录管理
+    path('room/<int:rid>/gamerecord/list/', game_record.game_record_list),
+    path('room/<int:rid>/gamerecord/add/', game_record.game_record_add),
+    path('room/<int:rid>/gamerecord/add/', game_record.game_record_winner_add),
+
+    path('room/gamerecord/add/', game_record.game_record_add),
+    path('room/gamerecord/detail/', game_record.game_record_detail),
+    path('room/gamerecord/edit/', game_record.game_record_edit),
+    path('room/gamerecord/confirm/', game_record.game_record_confirm),
+    path('room/gamerecord/delete/', game_record.game_record_delete),
 
 ]
 
